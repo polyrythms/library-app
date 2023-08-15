@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Новая книга</title>
+</head>
+<body>
+<!--формы для создания нового -->
+
+<!--method -- с каким http методом будет отправляться эта форма -->
+<!--action -- на какой адрес эта форма будет обращаться и передавать свои данные -->
+<!--атрибут object - объект в который мы передаем параметры формы-->
+<form th:method="POST" th:action="@{/books}" th:object="${book}">
+<!--  в созданной форме указывается то поле, которое будет назначаться для объекта Person-->
+<!--  label(подпись) для поля воода с id="name"-->
+    <label for="title">Название</label>
+    <input type="text" th:field="*{title}" id="title">
+<!--    Name Error - текст заменяется th на текст из аннотации валидатора-->
+    <div style="color:red" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Ошибка ввода названия</div>
+    <br/>
+    <label for="author">Автор</label>
+    <input type="text" th:field="*{author}" id="author">
+    <div style="color:red" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Ошибка ввода автора</div>
+    <br/>
+    <label for="year">Год издания</label>
+    <input type="text" th:field="*{year}" id="year">
+    <div style="color:red" th:if="${#fields.hasErrors('year')}" th:errors="*{year}">Ошибка ввода года издания</div>
+    <br/>
+
+<!--  кнопка при нажатии которой данные формы отправляются с POST запросом-->
+  <input type="submit" value="Create!"/>
+</form>
+</body>
+</html>
