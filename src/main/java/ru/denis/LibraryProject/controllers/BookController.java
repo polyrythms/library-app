@@ -5,73 +5,66 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.denis.LibraryProject.dao.BookDAO;
-import ru.denis.LibraryProject.dao.PersonDAO;
 import ru.denis.LibraryProject.models.Book;
 import ru.denis.LibraryProject.models.Person;
+import ru.denis.LibraryProject.services.BooksService;
+import ru.denis.LibraryProject.services.PeopleService;
 import ru.denis.LibraryProject.util.BookValidator;
 
-
 import javax.validation.Valid;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/books")
 public class BookController {
-    private final BookDAO bookDAO;
+
+    private final PeopleService peopleService;
+    private final BooksService booksService;
     private final BookValidator bookValidator;
-    private final PersonDAO personDAO;
-
-    @Autowired //контроллер конструируется на экземпляре DAO
-    public BookController(BookDAO bookDAO, BookValidator bookValidator, PersonDAO personDAO) {
-        this.bookDAO = bookDAO;
+    @Autowired
+    public BookController(PeopleService peopleService, BooksService booksService, BookValidator bookValidator) {
+        this.peopleService = peopleService;
+        this.booksService = booksService;
         this.bookValidator = bookValidator;
-        this.personDAO = personDAO;
     }
-
-
     @GetMapping()
     public String index(Model model) {
-        model.addAttribute("books", bookDAO.index());
+        model.addAttribute("books", booksService.findAll());
         return "books/index";
     }
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model, @ModelAttribute("person") Person person) {
-        model.addAttribute("book", bookDAO.show(id));
-        Optional<Person> owner = bookDAO.getBookOwner(id);
-        if (owner.isPresent()) {
-            model.addAttribute("owner", owner.get());
+        Book book = booksService.findOne(id);
+        model.addAttribute("book", booksService.findOne(id));
+        Person owner = book.getOwner();
+        if (owner != null) {
+            model.addAttribute("owner", owner);
         } else {
-            model.addAttribute("people", personDAO.index());
+            model.addAttribute("people", peopleService.findALl());
         }
         return "books/show";
     }
-    //метод возвращает html форму для создания новой книги
+
     @GetMapping("/new")
     public String newBook(@ModelAttribute("book") Book book) {
-        //создается пустой объект Book
-        // и передается для thymeleaf шаблона в атрибут "object th:object="${book}""
-        //для создания вручную объекта Person        model.addAttribute("book", new Book());
-        return "books/new"; //название thymeleaf шаблона в котором будет лежать форма запроса
+        return "books/new";
     }
-    //метод принимает на вход post запрос с параметрами (данные из формы) и добавляет новую книгу в бд
+
     @PostMapping()
-    //@ModelAttribute -- создает новый Book и в него положить параметры из формы
-    //На этапе вложения параметров из html формы в объект Book @Valid проверяет данные на корректность
+
     public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) {
         bookValidator.validate(book, bindingResult);
         if (bindingResult.hasErrors())
             return "books/new"; //если при ввооде были ошибки, вернуть форму ввода
-        bookDAO.save(book);
+        booksService.save(book);
 
-        return "redirect:/books"; //redirect - ключевое слово для перехода браузером на другую страницу
+        return "redirect:/books";
     }
     @GetMapping("/{id}/edit") //при гет запросе по адесу конкретного id/edit
     public String edit(Model model, @PathVariable("id") int id) { //параметром внедряем модель и id,используемый в адресе запроса
         //поместим в модель текущую книгу
         // (на форме редактирования будут отображаться ее поля)
-        model.addAttribute("book", bookDAO.show(id));
+        model.addAttribute("book", booksService.findOne(id));
         return "books/edit"; //адрес представления, в котором доступна наша модель
     }
     //метод, который принимает PATCH запрос с адреса /book/id
@@ -81,24 +74,23 @@ public class BookController {
         bookValidator.validate(book, bindingResult);
         if(bindingResult.hasErrors())
             return "books/edit";
-        bookDAO.update(id, book);
+        booksService.update(id, book);
         return "redirect:/books";
     }
-
     @PatchMapping("/{id}/assign")
     public String assign(@PathVariable("id") int id, @ModelAttribute("person") Person selectedPerson) {
-        bookDAO.assign(id, selectedPerson);
+        booksService.assign(id, selectedPerson);
         return "redirect:/books/" + id;
     }
     @PatchMapping("/{id}/release")
     public String release(@PathVariable("id") int id) {
-        bookDAO.release(id);
+        booksService.release(id);
         return "redirect:/books/" + id;
     }
 
     @DeleteMapping("/{id}")
     public String delete(@PathVariable("id") int id) {
-        bookDAO.delete(id);
+        booksService.delete(id);
         return "redirect:/books";
     }
 }
