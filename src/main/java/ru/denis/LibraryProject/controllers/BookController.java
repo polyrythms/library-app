@@ -1,6 +1,8 @@
 package ru.denis.LibraryProject.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,12 +28,27 @@ public class BookController {
         this.booksService = booksService;
         this.bookValidator = bookValidator;
     }
+//    @GetMapping()
+//    public String index(Model model) {
+//        model.addAttribute("books", booksService.findAll());
+//        return "books/index";
+//    }
     @GetMapping()
-    public String index(Model model) {
-        model.addAttribute("books", booksService.findAll());
+    public String index(@RequestParam(value = "books_per_page", defaultValue = "0") int booksPerPage,
+                        @RequestParam(value = "page", defaultValue = "0") int page,
+                        @RequestParam(value = "sort_by_year", defaultValue = "false") boolean sort,
+                        Model model) {
+        if(booksPerPage == 0 & sort == false) {
+            model.addAttribute("books", booksService.findAll());
+        }else if (booksPerPage == 0 & sort == true){
+            model.addAttribute("books", booksService.findAll(Sort.by("year")));
+        } else if (booksPerPage != 0 & sort == false) {
+            model.addAttribute("books", booksService.findAll(PageRequest.of(page, booksPerPage)).getContent());
+        } else if (booksPerPage != 0 & sort == true) {
+            model.addAttribute("books", booksService.findAll(PageRequest.of(page, booksPerPage, Sort.by("year"))).getContent());
+        }
         return "books/index";
     }
-
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model, @ModelAttribute("person") Person person) {
         Book book = booksService.findOne(id);

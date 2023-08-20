@@ -1,12 +1,16 @@
 package ru.denis.LibraryProject.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.denis.LibraryProject.models.Book;
 import ru.denis.LibraryProject.models.Person;
 import ru.denis.LibraryProject.repositories.BooksRepository;
 
+import java.net.ContentHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +42,9 @@ public class BooksService {
         return booksRepository.findAll();
     }
 
+    public Page<Book> findAll(Pageable pageable) {
+        return booksRepository.findAll(pageable);
+    }
     public Book findOne(int id) {
         Optional<Book> foundBook = booksRepository.findById(id);
         return foundBook.orElse(null);
@@ -55,6 +62,7 @@ public class BooksService {
         }
 
     }
+
     @Transactional
     public void save(Book book) {
         booksRepository.save(book);
@@ -77,5 +85,9 @@ public class BooksService {
     @Transactional
     public void release(int id) {
         booksRepository.findById(id).ifPresent(book -> book.setOwner(null));
+    }
+
+    public List<Book> findAll(Sort sort) {
+        return booksRepository.findAll(sort);
     }
 }
