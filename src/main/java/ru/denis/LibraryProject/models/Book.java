@@ -2,10 +2,13 @@ package ru.denis.LibraryProject.models;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.Date;
 
 @Entity
 @Table(name="book")
 public class Book {
+
+    private static final long MILLIS_IN_TEN_DAYS = 10 * 1000 * 60 * 60 * 24;
     @Id
     @Column(name= "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,14 +26,31 @@ public class Book {
     @Column(name = "year")
     private int year;
 
-
+    @Column(name = "signed_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date signedAt;
 
     @ManyToOne
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person owner;
 
+    @Transient
+    private boolean isOverdue;
+
     public Book() {
 
+    }
+    public boolean getIsOverdue() {
+        if (signedAt == null)
+            return isOverdue = false;
+        if (signedAt.getTime() + MILLIS_IN_TEN_DAYS < new Date().getTime()) {
+            return isOverdue = true;
+        } else {
+            return isOverdue = false;
+        }
+    }
+    public void setIsOverdue(boolean isOverdue) {
+        this.isOverdue = isOverdue;
     }
 
     public Book(int id, String title, String author, int year) {
@@ -71,12 +91,19 @@ public class Book {
     public void setAuthor(String author) {
         this.author = author;
     }
+
     public Person getOwner() {
         return owner;
     }
-
     public void setOwner(Person owner) {
         this.owner = owner;
     }
 
+    public Date getSignedAt() {
+        return signedAt;
+    }
+
+    public void setSignedAt(Date signetdAt) {
+        this.signedAt = signetdAt;
+    }
 }

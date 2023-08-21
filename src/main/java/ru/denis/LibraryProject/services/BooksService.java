@@ -11,7 +11,9 @@ import ru.denis.LibraryProject.models.Person;
 import ru.denis.LibraryProject.repositories.BooksRepository;
 
 import java.net.ContentHandler;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 public class BooksService {
+    private static final long MILLIS_IN_TEN_DAYS = 10 * 1000 * 60 * 60 * 24;
     private final BooksRepository booksRepository;
 
     @Autowired
@@ -53,6 +56,7 @@ public class BooksService {
     public void assign(int id, Person selectedPerson) {
         Book assignedBook = findOne(id);
         assignedBook.setOwner(selectedPerson);
+        assignedBook.setSignedAt(new Date());
         List<Book> books = selectedPerson.getBooks();
         if (books != null) {
             books.add(assignedBook);
@@ -84,10 +88,15 @@ public class BooksService {
 
     @Transactional
     public void release(int id) {
-        booksRepository.findById(id).ifPresent(book -> book.setOwner(null));
+        booksRepository.findById(id).ifPresent(book -> {
+            book.setOwner(null);
+            book.setSignedAt(null);
+            book.setIsOverdue(false);
+        });
     }
 
     public List<Book> findAll(Sort sort) {
         return booksRepository.findAll(sort);
     }
+
 }

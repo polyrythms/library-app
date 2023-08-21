@@ -47,7 +47,6 @@ public class PeopleController {
         return "people/new";
     }
     @PostMapping()
-
     public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
         personValidator.validate(person, bindingResult);
         if (bindingResult.hasErrors())
