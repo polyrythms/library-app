@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Все книги</title>
+</head>
+<body>
+
+<!--method -- с каким http методом будет отправляться эта форма -->
+<!--action -- на какой адрес эта форма будет обращаться и передавать свои данные -->
+<!--атрибут object - объект в который мы передаем параметры формы-->
+<form th:action="@{/books/search}" method="get">
+  <!--  в созданной форме указывается то поле, которое будет назначаться для объекта Person-->
+  <!--  label(подпись) для поля воода с id="name"-->
+  <label for="partOfTitle">Введите поисковый запрос</label>
+  <input type="text" name="partOfTitle" id="partOfTitle" th:value="${partOfTitle}">
+  <br/>
+  <input type="submit" value="Искать!"/>
+  <br/>
+  <div th:if="${not #lists.isEmpty(books)}">
+    <tr th:each="book : ${books}">
+      <a th:href="@{/books/{id}(id=${book.getId()})}"
+         th:text="${book.getTitle() + ', ' + book.getAuthor() + ', ' + book.getYear()}">book</a>
+      <p th:if="${book.getOwner() == null}">Книга свободна</p>
+      <p th:if="${book.getOwner() != null}">
+        Книга занята:
+        <a th:text="${book.getOwner().getName()}">Owners name</a>
+      </p>
+    </tr>
+  </div>
+</form>
+<br/>
+
+</body>
+</html>

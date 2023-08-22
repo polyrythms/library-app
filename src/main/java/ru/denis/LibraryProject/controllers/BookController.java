@@ -28,11 +28,7 @@ public class BookController {
         this.booksService = booksService;
         this.bookValidator = bookValidator;
     }
-//    @GetMapping()
-//    public String index(Model model) {
-//        model.addAttribute("books", booksService.findAll());
-//        return "books/index";
-//    }
+
     @GetMapping()
     public String index(@RequestParam(value = "books_per_page", defaultValue = "0") int booksPerPage,
                         @RequestParam(value = "page", defaultValue = "0") int page,
@@ -67,8 +63,23 @@ public class BookController {
         return "books/new";
     }
 
-    @PostMapping()
+    @GetMapping("/search")
+    public String showSearch(@RequestParam(value = "partOfTitle", required = false) String partOfTitle,
+                         Model model) {
+        if(partOfTitle != null && partOfTitle.length() != 0)
+            model.addAttribute("books", booksService.findByTitleStartingWith(partOfTitle));
+        return "books/search";
+    }
+//    @GetMapping("/search")
+//    public String search(@ModelAttribute("partOfTitle") String partOfTitle, Model model) {
+//        if(partOfTitle != null && partOfTitle.length() != 0)
+//            model.addAttribute("books", booksService.findByTitleStartingWith(partOfTitle));
+//        else
+//            model.addAttribute("books", null);
+//        return "books/search";
+//    }
 
+    @PostMapping()
     public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) {
         bookValidator.validate(book, bindingResult);
         if (bindingResult.hasErrors())

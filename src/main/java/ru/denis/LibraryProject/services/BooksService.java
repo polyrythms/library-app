@@ -10,8 +10,6 @@ import ru.denis.LibraryProject.models.Book;
 import ru.denis.LibraryProject.models.Person;
 import ru.denis.LibraryProject.repositories.BooksRepository;
 
-import java.net.ContentHandler;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -99,4 +97,7 @@ public class BooksService {
         return booksRepository.findAll(sort);
     }
 
+    public List<Book> findByTitleStartingWith(String partOfTitle) {
+        return booksRepository.findByTitleStartingWith(partOfTitle);
+    }
 }
